@@ -1,4 +1,4 @@
-# cmr-graphdb
+# graphdb-demo
 
 Nodejs application to perform graphdb operations in CMR
 
@@ -44,6 +44,7 @@ docker run -it -p 8182:8182 --network host tinkerpop/gremlin-console
 
 ### Graphexp
 Graphexp is a lightweight web interface to explore and display a graph stored in a Gremlin graph database, via the Gremlin server.
+
 Clone the graphexp repository at https://github.com/bricaud/graphexp
 
 ## Build
@@ -57,5 +58,7 @@ npm start
 ## Invoking
 
 To load some testing data in graphdb, in Cremlin Console: `graph.io(graphml()).readGraph('/data/missions-instruments-and-collections-042820.graphml')`
+
 To view collections in graph db, http://localhost:3000/datasets
+
 To make one collection connect to another, http://localhost:3000/datasets/connect/<coll_concpet_id_1>/<coll_concpet_id_2>
