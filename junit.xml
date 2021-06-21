@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="14" failures="0" errors="0" time="2.779">
+  <testsuite name="fetchPageFromCMR" errors="0" failures="0" skipped="0" timestamp="2021-06-17T20:53:16" time="0.678" tests="4">
+    <testcase classname="fetchPageFromCMR Empty page" name="fetchPageFromCMR Empty page" time="0.035">
+    </testcase>
+    <testcase classname="fetchPageFromCMR Single result" name="fetchPageFromCMR Single result" time="0.009">
+    </testcase>
+    <testcase classname="fetchPageFromCMR Single result with mocked ECHO token" name="fetchPageFromCMR Single result with mocked ECHO token" time="0.039">
+    </testcase>
+    <testcase classname="fetchPageFromCMR Invalid concept-id" name="fetchPageFromCMR Invalid concept-id" time="0.007">
+    </testcase>
+  </testsuite>
+  <testsuite name="bootstrapGremlinServer handler" errors="0" failures="0" skipped="0" timestamp="2021-06-17T20:53:17" time="0.511" tests="2">
+    <testcase classname="bootstrapGremlinServer handler When the response from CMR is an error throws an exception" name="bootstrapGremlinServer handler When the response from CMR is an error throws an exception" time="0.019">
+    </testcase>
+    <testcase classname="bootstrapGremlinServer handler test service response" name="bootstrapGremlinServer handler test service response" time="0.034">
+    </testcase>
+  </testsuite>
+  <testsuite name="indexCmrCollection handler" errors="0" failures="0" skipped="0" timestamp="2021-06-17T20:53:17" time="0.266" tests="3">
+    <testcase classname="indexCmrCollection handler test index of single collection" name="indexCmrCollection handler test index of single collection" time="0.055">
+    </testcase>
+    <testcase classname="indexCmrCollection handler test unsupported event type" name="indexCmrCollection handler test unsupported event type" time="0.006">
+    </testcase>
+    <testcase classname="indexCmrCollection handler test unsupported concept type" name="indexCmrCollection handler test unsupported concept type" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="getEchoToken" errors="0" failures="0" skipped="0" timestamp="2021-06-17T20:53:18" time="0.214" tests="2">
+    <testcase classname="getEchoToken fetches ECHO token from AWS" name="getEchoToken fetches ECHO token from AWS" time="0.014">
+    </testcase>
+    <testcase classname="getEchoToken IS_LOCAL = true" name="getEchoToken IS_LOCAL = true" time="0.004">
+    </testcase>
+  </testsuite>
+  <testsuite name="getSecureParam" errors="0" failures="0" skipped="0" timestamp="2021-06-17T20:53:18" time="0.202" tests="1">
+    <testcase classname="getSecureParam fetches urs credentials from AWS" name="getSecureParam fetches urs credentials from AWS" time="0.013">
+    </testcase>
+  </testsuite>
+  <testsuite name="clearScrollSession" errors="0" failures="0" skipped="0" timestamp="2021-06-17T20:53:18" time="0.105" tests="2">
+    <testcase classname="clearScrollSession Blank scroll session" name="clearScrollSession Blank scroll session" time="0.019">
+    </testcase>
+    <testcase classname="clearScrollSession Valid scroll id" name="clearScrollSession Valid scroll id" time="0.008">
+    </testcase>
+  </testsuite>
+</testsuites>

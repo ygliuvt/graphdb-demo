@@ -1,6 +1,6 @@
-# graphdb-demo
+# cmr-graph-db
 
-Nodejs application to perform graphdb operations in CMR
+Nodejs application to perform graph db operations in CMR
 
 # Development Environment
 
@@ -10,7 +10,7 @@ Nodejs application to perform graphdb operations in CMR
 * [Tinkerpop](https://tinkerpop.apache.org/)
 
 ### Node
-CMR Graph runs on Node.js, in order to run the application you'll need to install it.
+CMR graph-db runs on Node.js, in order to run the application you'll need to install nodejs.
 
 Recommended: Use Homebrew
 
@@ -29,36 +29,131 @@ npm install -g npm@latest
 Download docker on https://docs.docker.com/get-docker/
 
 ### Gremlin Server
-Gremlin Server provides a way to remotely execute Gremlin against one or more Graph instances hosted within it. We use the default Gremlin Server TinkerGraph db as our local development graph db. To start it, replace the <path_to_cmr_graphdb> with the path to your local cmr-graphdb directory and run:
+Gremlin Server provides a way to remotely execute Gremlin against one or more Graph instances hosted within it. We use the default Gremlin Server TinkerGraph db as our local development graph db. To start it, replace the <path_to_cmr_graphdb> with the path to your local CMR graph-db directory and run:
 
 ```
-docker run -it -p 8182:8182 -v <path_to_cmr_graphdb>/data:/data tinkerpop/gremlin-server
+docker run -it -p 8182:8182 -v <path_to_cmr_graph-db>/data:/data tinkerpop/gremlin-server
 ```
 
 ### Gremlin Console
-The Gremlin Console is a REPL environment that allows user to experiment with a variety of TinkerPop-related activities, such as loading data, administering graphs and working out complex traversals. We use Gremlin Console to connect to the Gremlin Server and explore the graphdb in local development. To start it, run:
+The Gremlin Console is a REPL environment that allows user to experiment with a variety of TinkerPop-related activities, such as loading data, administering graphs and working out complex traversals. We use Gremlin Console to connect to the Gremlin Server and explore the graph db in local development. To start it, run:
 
 ```
 docker run -it -p 8182:8182 --network host tinkerpop/gremlin-console
 ```
 
 ### Graphexp
-Graphexp is a lightweight web interface to explore and display a graph stored in a Gremlin graph database, via the Gremlin server.
-
+Graphexp is a lightweight web interface to explore and display a graph stored in a Gremlin graph database, via the Gremlin server. This is an easy way to visualize nodes and edges in the graph database.
 Clone the graphexp repository at https://github.com/bricaud/graphexp
 
-## Build
+## Serverless Applications
+There are two serverless applications that interact with the graph database:
 
+## Bootstrap
+
+  Bootstrap is a serverless application that load all collections from a CMR environment (SIT, UAT, PROD) into the graph database.
+
+### Build
+```
 npm install
+```
 
-## Run
+### Run
+To invoke the bootstrap-local function and load data into a local Gremlin server from the CMR run the following command:
+```
+npm run bootstrap-local
+```
 
-npm start
+### Test
+To run the test suite one time run
+```
+npm run test
+```
 
-## Invoking
+To run the test suite in watch mode, run
+```
+npm run test -- --watch
+```
 
-To load some testing data in graphdb, in Cremlin Console: `graph.io(graphml()).readGraph('/data/missions-instruments-and-collections-042820.graphml')`
+## Indexer
 
-To view collections in graph db, http://localhost:3000/datasets
+  Indexer is a serverless application that is connected to a SQS queue that is associated with the live CMR collection ingest/update events. It will index new CMR collection ingest/update into the graph database.
+  
+### Build
+```
+npm install
+```
 
-To make one collection connect to another, http://localhost:3000/datasets/connect/<coll_concpet_id_1>/<coll_concpet_id_2>
+### Deploy
+To deploy the graph indexer application into a CMR environment, run the following command (e.g. in SIT environment):
+```
+export AWS_PROFILE=cmr-sit
+npm run deploy -- --stage sit
+```
+
+### Rollback
+To roll back the deployed graph indexer application in a CMR environment, run the following command (e.g. in SIT environment):
+```
+export AWS_PROFILE=cmr-sit
+serverless remove -v --stage sit
+```
+
+## Explore Indexed Data
+CMR graph database is a Neptune database hosted on AWS. Currently, we only index collections and their documentation related urls as vertices in the graph database with edges (named `documents`) from the related url vertices to the collection vertices that reference them.
+
+The collection vertex has the following properties:
+
+* concept-id - Collection concept id
+* name - Url to the collection landing page
+* title - Entry title of the collection
+* doi - DOI link of the collection
+
+The documentation vertex has the following properties:
+
+* name - documentation url
+* title - description of the documentation url
+
+### Access via CMR graphdb endpoint
+
+CMR graphdb access endpoint is at: https://cmr.sit.earthdata.nasa.gov/graphdb. Users can use the [Gremlin API](https://tinkerpop.apache.org/gremlin.html) to explore the relationships that are indexed in the graph database. Here are some examples:
+
+To see the total number of vertices in the graph db:
+```
+curl -XPOST https://cmr.sit.earthdata.nasa.gov/graphdb  -d '{"gremlin":"g.V().count()"}'
+```
+
+To see the content of the first 10 vertices in the graph db:
+```
+curl -XPOST https://cmr.sit.earthdata.nasa.gov/graphdb  -d '{"gremlin":"g.V().limit(10)"}'
+```
+
+To see all collections that share the same documentation URL with the collection (C1233352242-GHRC):
+```
+curl -XPOST https://cmr.sit.earthdata.nasa.gov/graphdb  -d '{"gremlin":"g.V().hasLabel(\"dataset\").has(\"concept-id\", \"C1233352242-GHRC\").inE(\"documents\").outV().hasLabel(\"documentation\").outE(\"documents\").inV().hasLabel(\"dataset\").valueMap()"}'
+```
+
+For users have write access to graphdb, they can also add vertices and edges between vertices. For example:
+
+To create a collection vertex:
+```
+curl -XPOST https://cmr.sit.earthdata.nasa.gov/graphdb  -d '{"gremlin":"g.addV(\"dataset\").property(\"name\", \"https://dx.doi.org/undefined\").property(\"title\", \"GPM Ground Validation Precipitation Imaging Package (PIP) ICE POP V1\").property(\"concept-id\", \"C1233352242-GHRC\").property(\"doi\", \"10.5067/GPMGV/ICEPOP/PIP/DATA101\")"}'
+```
+
+To create a documentation vertex:
+```
+curl -XPOST https://cmr.sit.earthdata.nasa.gov/graphdb  -d '{"gremlin":"g.addV(\"documentation\").property(\"name\", \"https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20180003615.pdf\").property(\"title\", \"NASA Participation in the International Collaborative Experiments for Pyeongchang 2018 Olympic and Paralympic Winter Games (ICE-POP 2018)\")"}'
+```
+
+To create an edge from the above documentation vertex to the collection vertex:
+```
+curl -XPOST https://cmr.sit.earthdata.nasa.gov/graphdb  -d '{"gremlin":"g.V().hasLabel(\"documentation\").has(\"name\", \"https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20180003615.pdf\").addE(\"documents\").to(g.V().hasLabel(\"dataset\").has(\"concept-id\", \"C1233352242-GHRC\"))"}'
+```
+
+### Access via SSH tunnel and Gremlin Console locally
+For users who have access to AWS Neptune endpoint via an internal jumpbox, they can set up SSH tunnel to the Neptune endpoint and start Gremlin Console locally to connect to the Neptune endpoint. Then, they can use Gremlin console to explore the graph database as if it is local.
+
+Prerequisites: User must have ssh access to the internal jumpbox that has access to Neptune endpoint.
+
+See [this AWS document](https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-gremlin-console.html) on how to set up the Gremlin Console to connect to a Neptune DB instance.
+
+Happy exploring!
