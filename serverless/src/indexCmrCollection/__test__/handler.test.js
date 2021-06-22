@@ -21,7 +21,7 @@ describe('indexCmrCollection handler', () => {
     const docName = 'https://en.wikipedia.org/wiki/latent_nfi'
 
     await updateCollection('C1237293909-TESTPROV', datasetTitle, [docName])
-    await verifyExistInGraphDb(datasetTitle, docName)
+    await verifyNotExistInGraphDb(datasetTitle, docName)
   })
 
   test('test index of not found collection', async () => {
